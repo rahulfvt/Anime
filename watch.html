@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watch Anime - AnimeVerse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+    :root {
+        --primary: #8b5cf6;
+        --primary-dark: #7c3aed;
+        --accent: #f43f5e;
+        --bg: #0a0a12;
+        --bg-light: #12121f;
+        --bg-card: #16162a;
+        --bg-hover: #1e1e3a;
+        --text: #e2e8f0;
+        --text-muted: #64748b;
+        --border: rgba(255,255,255,0.06);
+        --glass: rgba(255,255,255,0.02);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        overflow-x: hidden;
+        line-height: 1.6;
+    }
+    h1, h2, h3, h4, .logo { font-family: 'Outfit', -apple-system, sans-serif; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
+
+    .page-loader {
+        position: fixed; inset: 0; z-index: 99999;
+        background: var(--bg);
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        transition: opacity 0.5s, visibility 0.5s;
+    }
+    .page-loader.hidden { opacity: 0; visibility: hidden; }
+    .loader-ring {
+        width: 50px; height: 50px;
+        border: 3px solid var(--bg-hover);
+        border-top-color: var(--primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    .loader-text {
+        margin-top: 1rem; color: var(--text-muted);
+        font-size: 0.85rem; letter-spacing: 2px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    header {
+        position: fixed; top: 0; width: 100%; z-index: 1000;
+        background: rgba(10, 10, 18, 0.95);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border);
+    }
+    .header-container {
+        max-width: 1400px; margin: 0 auto; padding: 0 2rem;
+        display: flex; align-items: center; justify-content: space-between;
+        height: 65px;
+    }
+    .logo {
+        font-size: 1.5rem; font-weight: 800;
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        display: flex; align-items: center; gap: 0.4rem; cursor: pointer;
+        text-decoration: none;
+    }
+    .logo i { font-size: 1.3rem; }
+    nav ul { display: flex; list-style: none; gap: 1.5rem; }
+    nav a {
+        color: var(--text-muted); text-decoration: none;
+        font-weight: 500; font-size: 0.9rem; transition: all 0.3s;
+        position: relative; padding: 0.3rem 0;
+    }
+    nav a:hover, nav a.active { color: var(--text); }
+    nav a::after {
+        content: ''; position: absolute; bottom: -2px; left: 0;
+        width: 0; height: 2px;
+        background: linear-gradient(90deg, var(--primary), var(--accent));
+        transition: width 0.3s;
+    }
+    nav a:hover::after, nav a.active::after { width: 100%; }
+
+    .header-actions { display: flex; align-items: center; gap: 0.8rem; }
+    .search-box { position: relative; }
+    .search-box input {
+        background: var(--glass); border: 1px solid var(--border);
+        border-radius: 50px; padding: 0.5rem 1rem 0.5rem 2.2rem;
+        color: var(--text); width: 220px; outline: none;
+        transition: all 0.3s; font-size: 0.85rem;
+    }
+    .search-box input:focus {
+        border-color: var(--primary); width: 280px; background: var(--bg-card);
+    }
+    .search-box i { position: absolute; left: 0.8rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.85rem; }
+
+    .btn {
+        padding: 0.5rem 1.2rem; border-radius: 50px; border: none;
+        cursor: pointer; font-weight: 600; font-size: 0.85rem;
+        transition: all 0.3s;
+        text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem;
+    }
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4); }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+
+    .mobile-menu-btn {
+        display: none; background: none; border: none;
+        color: var(--text); font-size: 1.3rem; cursor: pointer;
+    }
+
+    main { margin-top: 65px; padding: 1.5rem; }
+
+    /* WATCH PAGE STYLES */
+    .watch-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+    }
+    .breadcrumb a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    .breadcrumb a:hover {
+        text-decoration: underline;
+    }
+
+    .video-section {
+        background: var(--bg-card);
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        margin-bottom: 2rem;
+    }
+
+    .video-player-wrapper {
+        position: relative;
+        padding-bottom: 56.25%;
+        background: #000;
+    }
+
+    .video-player-wrapper video {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+
+    .video-info {
+        padding: 1.5rem;
+    }
+
+    .video-info h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .video-meta {
+        display: flex;
+        gap: 1rem;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .video-meta span {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .video-meta .badge {
+        background: var(--primary);
+        color: white;
+        padding: 0.15rem 0.6rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .video-desc {
+        color: var(--text-muted);
+        line-height: 1.7;
+        font-size: 0.9rem;
+    }
+
+    .server-section {
+        background: var(--bg-card);
+        border-radius: 16px;
+        padding: 1.5rem;
+        border: 1px solid var(--border);
+        margin-bottom: 2rem;
+    }
+
+    .server-section h3 {
+        font-size: 1rem;
+        margin-bottom: 1rem;
+        color: var(--text-muted);
+    }
+
+    .server-list {
+        display: flex;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+    }
+
+    .server-btn {
+        padding: 0.5rem 1.2rem;
+        border-radius: 8px;
+        background: var(--bg-hover);
+        border: 1px solid var(--border);
+        color: var(--text);
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: all 0.3s;
+    }
+
+    .server-btn:hover, .server-btn.active {
+        background: var(--primary);
+        border-color: var(--primary);
+    }
+
+    .episodes-section {
+        background: var(--bg-card);
+        border-radius: 16px;
+        padding: 1.5rem;
+        border: 1px solid var(--border);
+        margin-bottom: 2rem;
+    }
+
+    .episodes-section h3 {
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .episodes-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 0.8rem;
+    }
+
+    .episode-btn {
+        padding: 0.7rem;
+        border-radius: 10px;
+        background: var(--bg-hover);
+        border: 1px solid var(--border);
+        color: var(--text);
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.3s;
+        text-align: center;
+        text-decoration: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.2rem;
+    }
+
+    .episode-btn:hover {
+        background: var(--primary);
+        border-color: var(--primary);
+        transform: translateY(-2px);
+    }
+
+    .episode-btn.active {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        border-color: var(--primary);
+        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+    }
+
+    .episode-btn .ep-num {
+        font-size: 1rem;
+    }
+
+    .episode-btn .ep-label {
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        font-weight: 400;
+    }
+
+    .episode-btn.active .ep-label {
+        color: rgba(255,255,255,0.8);
+    }
+
+    .related-section {
+        margin-bottom: 2rem;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.2rem;
+    }
+    .section-header h2 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .section-header h2 i { color: var(--primary); }
+
+    .anime-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 1.2rem;
+    }
+    .anime-card {
+        position: relative;
+        border-radius: 14px;
+        overflow: hidden;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        transition: all 0.4s;
+        cursor: pointer;
+        text-decoration: none;
+        display: block;
+    }
+    .anime-card:hover {
+        transform: translateY(-6px);
+        border-color: var(--primary);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+    }
+    .anime-image {
+        position: relative;
+        aspect-ratio: 2/3;
+        overflow: hidden;
+        background: linear-gradient(135deg, #1a1a2e, #252545);
+    }
+    .anime-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .anime-badge {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        background: linear-gradient(135deg, var(--accent), #e11d48);
+        color: white;
+        padding: 0.2rem 0.6rem;
+        border-radius: 50px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        z-index: 2;
+    }
+    .anime-badge.season {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    }
+    .play-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    .anime-card:hover .play-overlay { opacity: 1; }
+    .play-btn {
+        width: 50px;
+        height: 50px;
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(10px);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid rgba(255,255,255,0.2);
+    }
+    .play-btn i { color: white; font-size: 1.2rem; margin-left: 3px; }
+    .anime-info { padding: 0.8rem; }
+    .anime-info h3 {
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        line-height: 1.3;
+        color: var(--text);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .anime-meta {
+        display: flex;
+        justify-content: space-between;
+        color: var(--text-muted);
+        font-size: 0.75rem;
+    }
+
+    footer {
+        background: var(--bg-light);
+        border-top: 1px solid var(--border);
+        padding: 2.5rem 2rem 1.2rem;
+        margin-top: 3rem;
+    }
+    .footer-content {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+        margin-bottom: 1.5rem;
+    }
+    .footer-section h3 { font-size: 1.1rem; margin-bottom: 0.8rem; }
+    .footer-section ul { list-style: none; }
+    .footer-section ul li { margin-bottom: 0.4rem; }
+    .footer-section a {
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 0.85rem;
+    }
+    .footer-section a:hover { color: var(--primary); }
+    .social-links { display: flex; gap: 0.8rem; margin-top: 0.8rem; }
+    .social-links a {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--glass);
+        border: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text);
+        text-decoration: none;
+    }
+    .footer-bottom {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding-top: 1.2rem;
+        border-top: 1px solid var(--border);
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.8rem;
+    }
+
+    @media (max-width: 768px) {
+        .header-container { padding: 0 1rem; height: 60px; }
+        nav { display: none; }
+        .mobile-menu-btn { display: block; }
+        main { padding: 1rem; margin-top: 60px; }
+        .video-info h1 { font-size: 1.2rem; }
+        .episodes-grid { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); }
+        .anime-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+    }
+    </style>
+</head>
+<body>
+    <div class="page-loader" id="pageLoader">
+        <div class="loader-ring"></div>
+        <div class="loader-text">LOADING PLAYER...</div>
+    </div>
+
+    <header>
+        <div class="header-container">
+            <a href="index.html" class="logo"><i class="fas fa-play-circle"></i> AnimeVerse</a>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="anime-list.html">Anime List</a></li>
+                    <li><a href="new-season.html">New Season</a></li>
+                    <li><a href="movies.html">Movies</a></li>
+                    <li><a href="popular.html">Popular</a></li>
+                </ul>
+            </nav>
+            <div class="header-actions">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search anime...">
+                </div>
+                <a href="#" class="btn btn-primary"><i class="fas fa-user"></i> Login</a>
+                <button class="mobile-menu-btn"><i class="fas fa-bars"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="watch-container">
+            <div class="breadcrumb">
+                <a href="index.html">Home</a>
+                <i class="fas fa-chevron-right" style="font-size: 0.7rem;"></i>
+                <a href="anime-list.html">Anime</a>
+                <i class="fas fa-chevron-right" style="font-size: 0.7rem;"></i>
+                <span id="breadcrumbTitle">Loading...</span>
+            </div>
+
+            <div class="video-section">
+                <div class="video-player-wrapper">
+                    <video id="mainVideo" controls poster="">
+                        <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                <div class="video-info">
+                    <h1 id="animeTitle">Loading...</h1>
+                    <div class="video-meta">
+                        <span class="badge" id="animeSeason">Season 1</span>
+                        <span><i class="fas fa-tv"></i> <span id="currentEp">Episode 1</span></span>
+                        <span><i class="fas fa-clock"></i> 24 min</span>
+                        <span><i class="fas fa-calendar"></i> 2024</span>
+                        <span><i class="fas fa-star"></i> HD</span>
+                        <span><i class="fas fa-closed-captioning"></i> Sub</span>
+                    </div>
+                    <p class="video-desc" id="animeDesc">Loading description...</p>
+                </div>
+            </div>
+
+            <div class="server-section">
+                <h3><i class="fas fa-server"></i> Select Server</h3>
+                <div class="server-list">
+                    <button class="server-btn active" onclick="changeServer(this)">Server 1</button>
+                    <button class="server-btn" onclick="changeServer(this)">Server 2</button>
+                    <button class="server-btn" onclick="changeServer(this)">Server 3</button>
+                    <button class="server-btn" onclick="changeServer(this)">Server 4</button>
+                </div>
+            </div>
+
+            <div class="episodes-section">
+                <h3><i class="fas fa-list"></i> Episodes</h3>
+                <div class="episodes-grid" id="episodesGrid"></div>
+            </div>
+
+            <div class="related-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-heart"></i> You May Also Like</h2>
+                </div>
+                <div class="anime-grid" id="relatedGrid"></div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3><i class="fas fa-play-circle" style="color:var(--primary);"></i> AnimeVerse</h3>
+                <p>Your ultimate destination for watching anime online.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-discord"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="anime-list.html">Anime List</a></li>
+                    <li><a href="new-season.html">New Season</a></li>
+                    <li><a href="popular.html">Popular</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Support</h3>
+                <ul>
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Terms</a></li>
+                    <li><a href="#">Privacy</a></li>
+                    <li><a href="#">DMCA</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p> AnimeVerse. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+    const animeDB = {
+        latest: [
+            { id: 1, title: "The Angel Next Door Spoils Me Rotten", season: "Season 2", ep: "EP 1-4", totalEps: 4, image: "https://cdn.myanimelist.net/images/anime/1240/134653.jpg", desc: "Amane lives alone in an apartment, and the most beautiful girl in school, Mahiru, lives just beyond the wall." },
+            { id: 2, title: "The Warrior Princess and the Barbaric King", season: "Season 1", ep: "EP 1-3", totalEps: 3, image: "https://cdn.myanimelist.net/images/anime/1763/139803.jpg", desc: "A warrior princess must marry the barbaric king to save her kingdom." },
+            { id: 3, title: "Snowball Earth", season: "Season 1", ep: "EP 1-4", totalEps: 4, image: "https://cdn.myanimelist.net/images/anime/1763/139803.jpg", desc: "In a frozen world, humanity fights for survival against the elements." },
+            { id: 4, title: "Dr. Stone", season: "Season 4", ep: "EP 25-31", totalEps: 7, image: "https://cdn.myanimelist.net/images/anime/1613/102576.jpg", desc: "Senku and his friends continue their journey to rebuild civilization." },
+            { id: 5, title: "An Observation Log of My Fiancée", season: "Season 1", ep: "EP 1-4", totalEps: 4, image: "https://cdn.myanimelist.net/images/anime/1240/134653.jpg", desc: "A man observes his mysterious fiancée who may not be entirely human." },
+            { id: 6, title: "The Beginning After the End", season: "Season 2", ep: "EP 1-4", totalEps: 4, image: "https://cdn.myanimelist.net/images/anime/1613/102576.jpg", desc: "King Grey is reincarnated into a world of magic and monsters." },
+            { id: 7, title: "Marriage Toxin", season: "Season 1", ep: "EP 1-3", totalEps: 3, image: "https://cdn.myanimelist.net/images/anime/1763/139803.jpg", desc: "A hitman must get married to save his life, but love complicates things." },
+            { id: 8, title: "Reborn as a Vending Machine", season: "Season 3", ep: "EP 1-4", totalEps: 4, image: "https://cdn.myanimelist.net/images/anime/1240/134653.jpg", desc: "A man dies and is reincarnated as a vending machine in another world." },
+            { id: 9, title: "Eren the Southpaw", season: "Season 1", ep: "EP 1-3", totalEps: 3, image: "https://cdn.myanimelist.net/images/anime/13/17405.jpg", desc: "A left-handed warrior rises through the ranks in a medieval world." },
+            { id: 10, title: "Easygoing Territory Defense", season: "Season 1", ep: "EP 6-11", totalEps: 6, image: "https://cdn.myanimelist.net/images/anime/6/20936.jpg", desc: "A lazy lord defends his territory with unconventional strategies." },
+            { id: 11, title: "Release that Witch", season: "Season 1", ep: "EP 3-8", totalEps: 6, image: "https://cdn.myanimelist.net/images/anime/1613/102576.jpg", desc: "A prince uses science and magic to revolutionize his kingdom." },
+            { id: 12, title: "Agents of the Four Seasons", season: "Season 1", ep: "EP 1-4", totalEps: 4, image: "https://cdn.myanimelist.net/images/anime/1240/134653.jpg", desc: "Four agents control the seasons to maintain world balance." }
+        ],
+        popular: [
+            { id: 101, title: "Jujutsu Kaisen", season: "Season 3", ep: "EP 10-12", totalEps: 3, image: "https://cdn.myanimelist.net/images/anime/1171/109222.jpg", desc: "Yuji Itadori joins a secret organization to fight cursed spirits." },
+            { id: 102, title: "Frieren: Beyond Journey's End", season: "Season 2", ep: "EP 8-10", totalEps: 3, image: "https://cdn.myanimelist.net/images/anime/1015/138006.jpg", desc: "An elf mage reflects on her journey after defeating the Demon King." },
+            { id: 103, title: "Liar Game", season: "Season 1", ep: "EP 1-3", totalEps: 3, image: "https://cdn.myanimelist.net/images/anime/13/17405.jpg", desc: "Players compete in psychological games of deception and trust." },
+            { id: 104, title: "Wistoria: Wand & Sword", season: "Season 2", ep: "EP 1-2", totalEps: 2, image: "https://cdn.myanimelist.net/images/anime/1763/139803.jpg", desc: "A boy with no magic fights with a sword in a magic academy." },
+            { id: 105, title: "Daemons of the Shadow Realm", season: "Season 1", ep: "EP 1-4", totalEps: 4, image: "https://cdn.myanimelist.net/images/anime/1171/109222.jpg", desc: "Shadow creatures threaten humanity and only daemons can stop them." },
+            { id: 106, title: "Cute Girl in Hero's Party", season: "Season 1", ep: "EP 1-3", totalEps: 3, image: "https://cdn.myanimelist.net/images/anime/1015/138006.jpg", desc: "A cute girl joins the hero's party with surprising abilities." }
+        ],
+        newSeason: [
+            { id: 201, title: "The Angel Next Door Spoils Me Rotten", season: "Season 2", ep: "EP 1-4", totalEps: 4, image: "https://cdn.myanimelist.net/images/anime/1240/134653.jpg", desc: "Season 2 of the heartwarming romance continues." },
+            { id: 202, title: "The Beginning After the End", season: "Season 2", ep: "EP 1-4", totalEps: 4, image: "https://cdn.myanimelist.net/images/anime/1613/102576.jpg", desc: "Arthur's journey continues in the magical world." },
+            { id: 203, title: "Frieren: Beyond Journey's End", season: "Season 2", ep: "EP 8-10", totalEps: 3, image: "https://cdn.myanimelist.net/images/anime/1015/138006.jpg", desc: "Frieren continues her emotional journey through time." },
+            { id: 204, title: "Wistoria: Wand & Sword", season: "Season 2", ep: "EP 1-2", totalEps: 2, image: "https://cdn.myanimelist.net/images/anime/1763/139803.jpg", desc: "Will's second year at the magic academy begins." },
+            { id: 205, title: "Dr. Stone", season: "Season 4", ep: "EP 25-31", totalEps: 7, image: "https://cdn.myanimelist.net/images/anime/1613/102576.jpg", desc: "The science kingdom faces its greatest challenge yet." },
+            { id: 206, title: "Jujutsu Kaisen", season: "Season 3", ep: "EP 10-12", totalEps: 3, image: "https://cdn.myanimelist.net/images/anime/1171/109222.jpg", desc: "The culling game reaches its climax." }
+        ]
+    };
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const animeId = parseInt(urlParams.get('id')) || 1;
+
+    const allAnime = [...animeDB.latest, ...animeDB.popular, ...animeDB.newSeason];
+    let currentAnime = allAnime.find(a => a.id === animeId) || animeDB.latest[0];
+
+    document.title = currentAnime.title + ' - AnimeVerse';
+    document.getElementById('animeTitle').textContent = currentAnime.title;
+    document.getElementById('breadcrumbTitle').textContent = currentAnime.title;
+    document.getElementById('animeSeason').textContent = currentAnime.season;
+    document.getElementById('animeDesc').textContent = currentAnime.desc;
+    document.getElementById('mainVideo').poster = currentAnime.image;
+
+    const episodesGrid = document.getElementById('episodesGrid');
+    const totalEps = currentAnime.totalEps || 4;
+    let episodesHTML = '';
+
+    for (let i = 1; i <= Math.max(totalEps, 12); i++) {
+        episodesHTML += `
+            <button class="episode-btn ${i === 1 ? 'active' : ''}" onclick="playEpisode(${i}, this)">
+                <span class="ep-num">EP ${i}</span>
+                <span class="ep-label">${i <= totalEps ? 'Available' : 'Coming Soon'}</span>
+            </button>
+        `;
+    }
+    episodesGrid.innerHTML = episodesHTML;
+
+    function playEpisode(epNum, btn) {
+        document.querySelectorAll('.episode-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('currentEp').textContent = 'Episode ' + epNum;
+        document.querySelector('.video-player-wrapper').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function changeServer(btn) {
+        document.querySelectorAll('.server-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+
+    const related = allAnime.filter(a => a.id !== animeId).slice(0, 6);
+    document.getElementById('relatedGrid').innerHTML = related.map(anime => `
+        <a href="watch.html?id=${anime.id}" class="anime-card">
+            <div class="anime-image">
+                <img src="${anime.image}" alt="${anime.title}" loading="lazy"
+                     onerror="this.src='https://via.placeholder.com/300x450/1a1a2e/8b5cf6?text=${encodeURIComponent(anime.title.substring(0,15))}'">
+                <span class="anime-badge season">${anime.season}</span>
+                <div class="play-overlay">
+                    <div class="play-btn"><i class="fas fa-play"></i></div>
+                </div>
+            </div>
+            <div class="anime-info">
+                <h3>${anime.title}</h3>
+                <div class="anime-meta">
+                    <span>${anime.ep}</span>
+                    <span>HD</span>
+                </div>
+            </div>
+        </a>
+    `).join('');
+
+    setTimeout(() => {
+        document.getElementById('pageLoader').classList.add('hidden');
+    }, 600);
+    </script>
+</body>
+</html>
