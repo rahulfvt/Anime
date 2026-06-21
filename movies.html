@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movies - AnimeVerse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="page-loader" id="pageLoader">
+        <div class="loader-ring"></div>
+        <div class="loader-text">LOADING MOVIES...</div>
+    </div>
+
+    <header>
+        <div class="header-container">
+            <a href="../index.html" class="logo"><i class="fas fa-play-circle"></i> AnimeVerse</a>
+            <nav>
+                <ul>
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="anime-list.html">Anime List</a></li>
+                    <li><a href="new-season.html">New Season</a></li>
+                    <li><a href="movies.html" class="active">Movies</a></li>
+                    <li><a href="popular.html">Popular</a></li>
+                </ul>
+            </nav>
+            <div class="header-actions">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search movies...">
+                </div>
+                <a href="#" class="btn btn-primary"><i class="fas fa-user"></i> Login</a>
+                <button class="mobile-menu-btn"><i class="fas fa-bars"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="section-header">
+            <h2><i class="fas fa-film"></i> Anime Movies</h2>
+            <span style="color: var(--text-muted); font-size: 0.85rem;">Feature films and specials</span>
+        </div>
+
+        <div class="anime-grid" id="moviesGrid"></div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3><i class="fas fa-play-circle" style="color:var(--primary);"></i> AnimeVerse</h3>
+                <p>Your ultimate destination for watching anime online.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-discord"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="anime-list.html">Anime List</a></li>
+                    <li><a href="new-season.html">New Season</a></li>
+                    <li><a href="popular.html">Popular</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Support</h3>
+                <ul>
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">DMCA</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p> AnimeVerse. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="../js/main.js"></script>
+    <script>
+        // Movies data (using popular anime as movies for demo)
+        const moviesData = [
+            { id: 301, title: "Demon Slayer: Mugen Train", season: "Movie", ep: "Full Movie", totalEps: 1, image: "https://cdn.myanimelist.net/images/anime/1704/106947.jpg", desc: "Tanjiro and friends board the Mugen Train to investigate disappearances." },
+            { id: 302, title: "Jujutsu Kaisen 0", season: "Movie", ep: "Full Movie", totalEps: 1, image: "https://cdn.myanimelist.net/images/anime/1121/119046.jpg", desc: "Yuta Okkotsu seeks to control the cursed spirit of his childhood friend." },
+            { id: 303, title: "Spirited Away", season: "Movie", ep: "Full Movie", totalEps: 1, image: "https://cdn.myanimelist.net/images/anime/6/79597.jpg", desc: "Chihiro enters a world of spirits and must save her parents." },
+            { id: 304, title: "Your Name", season: "Movie", ep: "Full Movie", totalEps: 1, image: "https://cdn.myanimelist.net/images/anime/5/87048.jpg", desc: "Two teenagers find themselves swapping bodies across time and distance." },
+            { id: 305, title: "A Silent Voice", season: "Movie", ep: "Full Movie", totalEps: 1, image: "https://cdn.myanimelist.net/images/anime/1122/96435.jpg", desc: "A former bully seeks redemption with the deaf girl he once tormented." },
+            { id: 306, title: "Weathering With You", season: "Movie", ep: "Full Movie", totalEps: 1, image: "https://cdn.myanimelist.net/images/anime/10/87048.jpg", desc: "A runaway boy meets a girl who can control the weather in Tokyo." }
+        ];
+
+        renderAnimeGrid('moviesGrid', moviesData);
+        initHeader();
+        hideLoader();
+    </script>
+</body>
+</html>

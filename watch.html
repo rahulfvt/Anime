@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watch Anime - AnimeVerse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        /* Watch Page Specific Styles */
+        .watch-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        .video-section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            margin-bottom: 2rem;
+        }
+
+        .video-player-wrapper {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 */
+            background: #000;
+        }
+
+        .video-player-wrapper video,
+        .video-player-wrapper iframe {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .video-info {
+            padding: 1.5rem;
+        }
+
+        .video-info h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .video-meta {
+            display: flex;
+            gap: 1rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .video-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .video-meta .badge {
+            background: var(--primary);
+            color: white;
+            padding: 0.15rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .video-desc {
+            color: var(--text-muted);
+            line-height: 1.7;
+            font-size: 0.9rem;
+        }
+
+        /* Episode List */
+        .episodes-section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            margin-bottom: 2rem;
+        }
+
+        .episodes-section h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .episodes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 0.8rem;
+        }
+
+        .episode-btn {
+            padding: 0.7rem;
+            border-radius: 10px;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.2rem;
+        }
+
+        .episode-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .episode-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-color: var(--primary);
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+        }
+
+        .episode-btn .ep-num {
+            font-size: 1rem;
+        }
+
+        .episode-btn .ep-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .episode-btn.active .ep-label {
+            color: rgba(255,255,255,0.8);
+        }
+
+        /* Related Anime */
+        .related-section {
+            margin-bottom: 2rem;
+        }
+
+        /* Server Selector */
+        .server-section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            margin-bottom: 2rem;
+        }
+
+        .server-section h3 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+
+        .server-list {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .server-btn {
+            padding: 0.5rem 1.2rem;
+            border-radius: 8px;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .server-btn:hover, .server-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .breadcrumb a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .watch-container { padding: 1rem; }
+            .video-info h1 { font-size: 1.2rem; }
+            .episodes-grid { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Page Loader -->
+    <div class="page-loader" id="pageLoader">
+        <div class="loader-ring"></div>
+        <div class="loader-text">LOADING PLAYER...</div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <a href="../index.html" class="logo"><i class="fas fa-play-circle"></i> AnimeVerse</a>
+            <nav>
+                <ul>
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="anime-list.html">Anime List</a></li>
+                    <li><a href="new-season.html">New Season</a></li>
+                    <li><a href="movies.html">Movies</a></li>
+                    <li><a href="popular.html">Popular</a></li>
+                </ul>
+            </nav>
+            <div class="header-actions">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search anime...">
+                </div>
+                <a href="#" class="btn btn-primary"><i class="fas fa-user"></i> Login</a>
+                <button class="mobile-menu-btn"><i class="fas fa-bars"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main style="margin-top: 65px; padding: 1.5rem;">
+        <div class="watch-container">
+            <!-- Breadcrumb -->
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a>
+                <i class="fas fa-chevron-right" style="font-size: 0.7rem;"></i>
+                <a href="anime-list.html">Anime</a>
+                <i class="fas fa-chevron-right" style="font-size: 0.7rem;"></i>
+                <span id="breadcrumbTitle">Loading...</span>
+            </div>
+
+            <!-- Video Player -->
+            <div class="video-section">
+                <div class="video-player-wrapper" id="videoContainer">
+                    <video id="mainVideo" controls poster="">
+                        <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                <div class="video-info">
+                    <h1 id="animeTitle">Loading...</h1>
+                    <div class="video-meta">
+                        <span class="badge" id="animeSeason">Season 1</span>
+                        <span><i class="fas fa-tv"></i> <span id="currentEp">Episode 1</span></span>
+                        <span><i class="fas fa-clock"></i> 24 min</span>
+                        <span><i class="fas fa-calendar"></i> 2024</span>
+                        <span><i class="fas fa-star"></i> HD</span>
+                        <span><i class="fas fa-closed-captioning"></i> Sub</span>
+                    </div>
+                    <p class="video-desc" id="animeDesc">Loading description...</p>
+                </div>
+            </div>
+
+            <!-- Server Selector -->
+            <div class="server-section">
+                <h3><i class="fas fa-server"></i> Select Server</h3>
+                <div class="server-list">
+                    <button class="server-btn active" onclick="changeServer(this, 'server1')">Server 1</button>
+                    <button class="server-btn" onclick="changeServer(this, 'server2')">Server 2</button>
+                    <button class="server-btn" onclick="changeServer(this, 'server3')">Server 3</button>
+                    <button class="server-btn" onclick="changeServer(this, 'server4')">Server 4</button>
+                </div>
+            </div>
+
+            <!-- Episodes -->
+            <div class="episodes-section">
+                <h3><i class="fas fa-list"></i> Episodes</h3>
+                <div class="episodes-grid" id="episodesGrid"></div>
+            </div>
+
+            <!-- Related Anime -->
+            <div class="related-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-heart"></i> You May Also Like</h2>
+                </div>
+                <div class="anime-grid" id="relatedGrid"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3><i class="fas fa-play-circle" style="color:var(--primary);"></i> AnimeVerse</h3>
+                <p>Your ultimate destination for watching anime online in Hindi, Tamil, and Telugu.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-discord"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="anime-list.html">Anime List</a></li>
+                    <li><a href="new-season.html">New Season</a></li>
+                    <li><a href="popular.html">Popular</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Support</h3>
+                <ul>
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">DMCA</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p> AnimeVerse. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="../js/main.js"></script>
+    <script>
+        // Get anime ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const animeId = parseInt(urlParams.get('id')) || 1;
+
+        // Find anime data
+        let currentAnime = null;
+        const allAnime = [...animeDB.latest, ...animeDB.popular, ...animeDB.newSeason];
+        currentAnime = allAnime.find(a => a.id === animeId) || animeDB.latest[0];
+
+        // Update page
+        document.title = currentAnime.title + ' - AnimeVerse';
+        document.getElementById('animeTitle').textContent = currentAnime.title;
+        document.getElementById('breadcrumbTitle').textContent = currentAnime.title;
+        document.getElementById('animeSeason').textContent = currentAnime.season;
+        document.getElementById('animeDesc').textContent = currentAnime.desc;
+        document.getElementById('mainVideo').poster = currentAnime.image;
+
+        // Generate episodes
+        const episodesGrid = document.getElementById('episodesGrid');
+        const totalEps = currentAnime.totalEps || 4;
+        let episodesHTML = '';
+
+        for (let i = 1; i <= Math.max(totalEps, 12); i++) {
+            episodesHTML += `
+                <button class="episode-btn ${i === 1 ? 'active' : ''}" onclick="playEpisode(${i})">
+                    <span class="ep-num">EP ${i}</span>
+                    <span class="ep-label">${i <= totalEps ? 'Available' : 'Coming Soon'}</span>
+                </button>
+            `;
+        }
+        episodesGrid.innerHTML = episodesHTML;
+
+        // Play episode function
+        function playEpisode(epNum) {
+            document.querySelectorAll('.episode-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.episode-btn').classList.add('active');
+
+            document.getElementById('currentEp').textContent = 'Episode ' + epNum;
+
+            // Scroll to video
+            document.getElementById('videoContainer').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // In real implementation, change video source here
+            // document.getElementById('mainVideo').src = 'your-video-url-ep' + epNum + '.mp4';
+        }
+
+        // Server change
+        function changeServer(btn, server) {
+            document.querySelectorAll('.server-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            // In real implementation, change video source based on server
+        }
+
+        // Render related anime
+        const relatedGrid = document.getElementById('relatedGrid');
+        const related = allAnime.filter(a => a.id !== animeId).slice(0, 6);
+        relatedGrid.innerHTML = related.map(anime => `
+            <a href="watch.html?id=${anime.id}" class="anime-card">
+                <div class="anime-image">
+                    <img src="${anime.image}" alt="${anime.title}" loading="lazy" onload="this.classList.add('loaded')"
+                         onerror="this.src='https://via.placeholder.com/300x450/1a1a2e/8b5cf6?text=${encodeURIComponent(anime.title.substring(0,15))}'">
+                    <div class="img-placeholder"><i class="fas fa-image"></i></div>
+                    <span class="anime-badge season">${anime.season}</span>
+                    <div class="play-overlay">
+                        <div class="play-btn"><i class="fas fa-play"></i></div>
+                    </div>
+                </div>
+                <div class="anime-info">
+                    <h3>${anime.title}</h3>
+                    <div class="anime-meta">
+                        <span><i class="fas fa-tv"></i> ${anime.ep}</span>
+                        <span><i class="fas fa-star"></i> HD</span>
+                    </div>
+                </div>
+            </a>
+        `).join('');
+
+        // Hide loader
+        setTimeout(() => {
+            document.getElementById('pageLoader').classList.add('hidden');
+        }, 600);
+    </script>
+</body>
+</html>
